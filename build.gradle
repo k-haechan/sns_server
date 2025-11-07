@@ -43,6 +43,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // SpringDoc OpenAPI Starter WebMVC UI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+    // Sql Logging
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.12.0'
+
 }
 
 tasks.named('test') {
