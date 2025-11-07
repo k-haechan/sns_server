@@ -14,6 +14,10 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests(
 				authorize -> authorize
+					// Swagger 관련 URL 접근 허용
+					.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
+						"/swagger-ui.html").permitAll()
+					// 에러 페이지 접근 허용
 					.requestMatchers("/error").permitAll()
 					.anyRequest().authenticated()
 			);
