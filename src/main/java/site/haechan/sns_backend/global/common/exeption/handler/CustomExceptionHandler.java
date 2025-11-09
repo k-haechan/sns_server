@@ -28,6 +28,6 @@ public class CustomExceptionHandler {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		// todo: 사용자 인증정보 객체 구현 및 로그용 DB 연결 후 로그 저장
 		return ResponseEntity.status(errorCode.getHttpStatus())
-			.body(ApiResponse.of(errorCode.getMessage()));
+			.body(ApiResponse.error(errorCode));
 	}
 }
