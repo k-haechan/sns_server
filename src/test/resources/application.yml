@@ -16,9 +16,4 @@ spring:
       host: localhost
       port: 6381
       password: 1234
-  decorator:
-    datasource:
-      p6spy:
-        enable-logging: true
-        logging: slf4j
-        multiline: true
+

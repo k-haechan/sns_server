@@ -4,17 +4,16 @@ spring:
       sns_backend
 
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    url: jdbc:p6spy:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
   flyway:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 1
-    locations:
-      - classpath:db/migration
-      - classpath:db/seed/dev # 개발환경에서만, 추후에 환경별로 파일 설정 필요
+    locations: classpath:db/migration
 
   jpa:
     hibernate:
@@ -30,10 +29,6 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
-  decorator:
-    datasource:
-      p6spy:
-        enable-logging: true
-        logging: slf4j
-        multiline: true
-
+logging:
+  file:
+    name: logs/sns-backend.log
