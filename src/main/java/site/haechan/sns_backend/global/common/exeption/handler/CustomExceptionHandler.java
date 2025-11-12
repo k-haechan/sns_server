@@ -4,10 +4,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import lombok.extern.slf4j.Slf4j;
 import site.haechan.sns_backend.global.common.exeption.CustomException;
 import site.haechan.sns_backend.global.common.exeption.error.ErrorCode;
 import site.haechan.sns_backend.global.common.response.ApiResponse;
 
+@Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
 	/**
@@ -26,7 +28,7 @@ public class CustomExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-		// todo: 사용자 인증정보 객체 구현 및 로그용 DB 연결 후 로그 저장
+		log.error("{} 예외 발생: {}", errorCode.getHttpStatus(), errorCode.getMessage(), e);
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ApiResponse.error(errorCode));
 	}
