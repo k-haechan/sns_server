@@ -32,7 +32,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Run build and tests (test profile)
-        env:
-          SPRING_PROFILES_ACTIVE: test
-        run: ./gradlew clean build
+      - name: Make .env from example
+        run: |
+          cp .env.example .env
+
+      - name: Run build and tests using .env
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          ./gradlew clean build -Dspring.profiles.active=dev
