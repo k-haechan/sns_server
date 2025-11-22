@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import site.haechan.sns_backend.domain.auth.dto.request.LoginRequest;
 import site.haechan.sns_backend.domain.member.dto.request.JoinRequest;
+import site.haechan.sns_backend.domain.member.dto.response.MemberBriefResponse;
 import site.haechan.sns_backend.domain.member.entity.Member;
 import site.haechan.sns_backend.domain.member.repository.MemberRepository;
 import site.haechan.sns_backend.global.common.exeption.CustomException;
@@ -37,5 +39,19 @@ public class MemberService {
 			throw new CustomException(ErrorCode.DATABASE_ERROR);
 
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public MemberBriefResponse login(LoginRequest request) {
+		String username = request.username();
+		String password = request.password();
+
+		Member member = memberRepository.findByUsername(username)
+			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+		if (!passwordEncoder.matches(password, member.getPassword())) {
+			throw new CustomException(ErrorCode.BAD_CREDENTIAL);
+		}
+		return MemberBriefResponse.from(member);
 	}
 }
