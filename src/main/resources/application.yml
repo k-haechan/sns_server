@@ -29,6 +29,17 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
-logging:
-  file:
-    name: logs/sns-backend.log
+#logging:
+#  file:
+#    name: logs/sns-backend.log
+
+custom:
+  jwt:
+    access-token:
+      secret: ${JWT_ACCESS_TOKEN_SECRET_KEY}
+    refresh-token:
+      secret: ${JWT_REFRESH_TOKEN_SECRET_KEY}
+
+  cookie:
+    domain: ${COOKIE_DOMAIN}
+
