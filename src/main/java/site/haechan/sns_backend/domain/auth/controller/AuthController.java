@@ -1,6 +1,7 @@
 package site.haechan.sns_backend.domain.auth.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,8 @@ import site.haechan.sns_backend.domain.auth.service.AuthService;
 import site.haechan.sns_backend.domain.member.dto.response.MemberBriefResponse;
 import site.haechan.sns_backend.domain.member.service.MemberService;
 import site.haechan.sns_backend.global.common.response.ApiResponse;
+import site.haechan.sns_backend.global.cookie.CookieService;
+import site.haechan.sns_backend.global.jwt.JwtType;
 
 @Slf4j
 @RestController
@@ -27,13 +30,20 @@ import site.haechan.sns_backend.global.common.response.ApiResponse;
 public class AuthController {
 	private final MemberService memberService;
 	private final AuthService authService;
+	private final CookieService cookieService;
 
 	@PostMapping( value = "/login", consumes = "application/json")
 	@Operation(summary = "로그인", description = "회원 정보를 기반으로 로그인합니다.")
 	@ResponseStatus(HttpStatus.OK)
 	public ApiResponse<MemberBriefResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 		MemberBriefResponse loginResponse = memberService.login(request);
-		authService.createAuthTokens(loginResponse.memberId(), response);
+
+		String accessToken = authService.generateToken(loginResponse.memberId(), JwtType.ACCESS);
+		String refreshToken = authService.generateToken(loginResponse.memberId(), JwtType.REFRESH);
+
+		cookieService.setCookie(response, JwtType.ACCESS.getTokenName(), accessToken, JwtType.ACCESS.getExpiration());
+		cookieService.setCookie(response, JwtType.REFRESH.getTokenName(), refreshToken, JwtType.REFRESH.getExpiration());
+
 		return ApiResponse.success("로그인 성공", loginResponse);
 	}
 
@@ -41,7 +51,15 @@ public class AuthController {
 	@Operation(summary = "로그아웃", description = "로그아웃을 수행합니다.")
 	@ResponseStatus(HttpStatus.OK)
 	public ApiResponse<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-		authService.deleteAuthTokens(request, response);
+		String refreshToken = cookieService.extractCookie(request, JwtType.REFRESH.getTokenName());
+
+		authService.revokeRefreshToken(refreshToken);
+
+		cookieService.deleteCookie(response, JwtType.ACCESS.getTokenName());
+		cookieService.deleteCookie(response, JwtType.REFRESH.getTokenName());
+
+		SecurityContextHolder.clearContext();
+		
 		return ApiResponse.success("로그아웃이 성공적으로 완료되었습니다.");
 	}
 }

@@ -33,23 +33,11 @@ spring:
 #  file:
 #    name: logs/sns-backend.log
 
-
-#jwt:
-#  access-token:
-#    secret: ${JWT_ACCESS_SECRET}
-#    issuer: ${BACKEND_HOST}
-#    expiration: 15m
-#  refresh-token:
-#    secret: ${JWT_REFRESH_SECRET}
-#    issuer: ${BACKEND_HOST}
-#    expiration: 7d
 custom:
   jwt:
     access-token:
-      expiration-time: 1h # 1hour
       secret: ${JWT_ACCESS_TOKEN_SECRET_KEY}
     refresh-token:
-      expiration-time: 30d # 30days
       secret: ${JWT_REFRESH_TOKEN_SECRET_KEY}
 
   cookie:

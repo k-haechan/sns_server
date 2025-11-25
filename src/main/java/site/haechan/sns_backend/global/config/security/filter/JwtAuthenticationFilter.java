@@ -19,11 +19,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import site.haechan.sns_backend.domain.auth.service.AuthService;
+import site.haechan.sns_backend.global.cookie.CookieService;
+import site.haechan.sns_backend.global.jwt.JwtType;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthService authService;
+	private final CookieService cookieService;
 
 	private void setAuthentication(Long memberId) {
 		// 인증 객체 생성 및 SecurityContext에 저장
@@ -44,19 +47,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 
 		try {
-			Claims accessTokenClaims = authService.getClaimsFromAccessToken(request)
-											.orElseThrow(()->new JwtException("Access token is missing"));
+			String accessToken = cookieService.extractCookie(request, JwtType.ACCESS.getTokenName());
+			Claims accessTokenClaims = authService.validateToken(accessToken, JwtType.ACCESS)
+				.orElseThrow(()->new JwtException("Access token is missing or invalid"));
 			// JWT 파싱 및 claims 추출
 			Long memberId = Long.valueOf(accessTokenClaims.getSubject());
 			setAuthentication(memberId);
 		} catch (JwtException e) { // 토큰 검증 실패 시
 			// refresh-token 검증
-			Optional<Claims> refreshTokenClaims = authService.getClaimsFromRefreshToken(request);
+			String refreshToken = cookieService.extractCookie(request, JwtType.REFRESH.getTokenName());
+			Optional<Claims> refreshTokenClaims = authService.validateToken(refreshToken, JwtType.REFRESH);
 			if (refreshTokenClaims.isPresent()) {
 				// 리프레시 토큰이 유효하면 새로운 액세스 토큰 발급 로직 수행
 				Long memberId = Long.valueOf(refreshTokenClaims.get().getSubject());
-				// 새로운 액세스 토큰 생성 및 쿠키에 설정
-				authService.createAuthTokens(memberId, response);
+				// 새로운 액세스 토큰, 리프레시 토큰 생성 및 쿠키에 설정
+				String newAccessToken = authService.generateToken(memberId, JwtType.ACCESS);
+				cookieService.setCookie(
+					response,
+					JwtType.ACCESS.getTokenName(),
+					newAccessToken,
+					JwtType.ACCESS.getExpiration()
+				);
 				// 인증 정보 설정
 				setAuthentication(memberId);
 			}

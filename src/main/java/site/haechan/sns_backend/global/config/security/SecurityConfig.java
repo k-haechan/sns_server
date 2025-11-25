@@ -18,6 +18,7 @@ import site.haechan.sns_backend.domain.auth.service.AuthService;
 import site.haechan.sns_backend.global.config.security.exception.CustomAccessDeniedHandler;
 import site.haechan.sns_backend.global.config.security.exception.CustomAuthenticationEntryPoint;
 import site.haechan.sns_backend.global.config.security.filter.JwtAuthenticationFilter;
+import site.haechan.sns_backend.global.cookie.CookieService;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +31,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthService authService) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthService authService, CookieService cookieService) throws Exception {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(
@@ -53,7 +54,7 @@ public class SecurityConfig {
 
 			// ✅ JWT 필터 등록
 			.addFilterBefore(
-				new JwtAuthenticationFilter(authService),
+				new JwtAuthenticationFilter(authService, cookieService),
 				UsernamePasswordAuthenticationFilter.class)
 
 			// ✅ 기본 인증 방식 비활성화 (JWT 사용)

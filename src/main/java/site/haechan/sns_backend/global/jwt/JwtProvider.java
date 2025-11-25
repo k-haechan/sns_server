@@ -1,26 +1,43 @@
-package site.haechan.sns_backend.global.jwt.component;
+package site.haechan.sns_backend.global.jwt;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import site.haechan.sns_backend.global.common.exeption.CustomException;
 import site.haechan.sns_backend.global.common.exeption.error.ErrorCode;
-import site.haechan.sns_backend.global.jwt.dto.JwtProperties;
 
 @Component
 public class JwtProvider {
-	public String generateToken(Long memberId, JwtProperties properties) {
-		SecretKey secretKey = properties.secretKey();
-		Duration expiration = properties.expiration();
+
+	private final SecretKey accessTokenSecretKey;
+	private final SecretKey refreshTokenSecretKey;
+
+	public JwtProvider(
+		@Value("${custom.jwt.access-token.secret}") String accessTokenSecret,
+		@Value("${custom.jwt.refresh-token.secret}") String refreshTokenSecret
+	) {
+		this.accessTokenSecretKey = Keys.hmacShaKeyFor(accessTokenSecret.getBytes(StandardCharsets.UTF_8));
+		this.refreshTokenSecretKey = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes(StandardCharsets.UTF_8));
+	}
+
+
+
+
+	public String generateToken(Long memberId, JwtType jwtType) {
+		Duration expiration = jwtType.getExpiration();
+		SecretKey secretKey = jwtType.equals(JwtType.ACCESS) ? accessTokenSecretKey : refreshTokenSecretKey;
 
 		Date now = new Date();
 		Date expiry = Date.from(now.toInstant().plus(expiration));
@@ -33,8 +50,8 @@ public class JwtProvider {
 			.compact();
 	}
 
-	public Claims parseClaims(String token, JwtProperties properties) {
-		SecretKey secretKey = properties.secretKey();
+	public Claims parseClaims(String token, JwtType jwtType) throws CustomException {
+		SecretKey secretKey = jwtType.equals(JwtType.ACCESS) ? accessTokenSecretKey : refreshTokenSecretKey;
 
 		try {
 			// JWT 파서 빌드 및 토큰 파싱
@@ -54,19 +71,8 @@ public class JwtProvider {
 		}
 	}
 
-	public boolean validateToken(String token, JwtProperties properties) {
-		try {
-			// 토큰 파싱 시도
-			parseClaims(token, properties);
-			// 만료 시간 확인
-			return true;
-		} catch (CustomException e) {
-			return false;
-		}
-	}
-
-	public Duration getLeftExpirationTime(String token, JwtProperties jwtProperties) {
-		Instant expiration = parseClaims(token, jwtProperties).getExpiration().toInstant();
+	public Duration getLeftExpirationTime(String token, JwtType jwtType) {
+		Instant expiration = parseClaims(token, jwtType).getExpiration().toInstant();
 		Instant now = Instant.now();
 		return Duration.between(now, expiration);
 	}

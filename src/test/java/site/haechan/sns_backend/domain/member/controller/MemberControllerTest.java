@@ -29,11 +29,9 @@ class MemberControllerTest {
 	private MockMvc mockMvc;
 	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
-	private MemberService memberService;
 
 	@MockitoBean
-	private MemberService mockMemberService;
+	private MemberService memberService;
 
 	@Nested
 	@DisplayName("회원가입")
