@@ -8,13 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import site.haechan.sns_backend.domain.auth.dto.request.LoginRequest;
 import site.haechan.sns_backend.domain.auth.service.AuthService;
@@ -23,16 +19,12 @@ import site.haechan.sns_backend.domain.member.service.MemberService;
 import site.haechan.sns_backend.global.common.exeption.CustomException;
 import site.haechan.sns_backend.global.common.exeption.error.ErrorCode;
 import site.haechan.sns_backend.global.cookie.CookieService;
+import site.haechan.sns_backend.template.ControllerTest;
 
 @DisplayName("AuthController 단위 테스트")
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class AuthControllerTest {
-	@Autowired
-	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
-
+class AuthControllerTest extends ControllerTest {
 	@MockitoBean
 	private MemberService memberService;
 

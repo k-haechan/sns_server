@@ -34,7 +34,7 @@ public class AuthService {
 	}
 
 	public Optional<Claims> validateToken(String token, JwtType type) {
-		if (token == null || type == JwtType.ACCESS && redisService.hasKey(RedisKeyType.BLACKLIST, token))
+		if (token == null || (type == JwtType.REFRESH && redisService.hasKey(RedisKeyType.BLACKLIST, token)))
 			return Optional.empty();
 
 		try {

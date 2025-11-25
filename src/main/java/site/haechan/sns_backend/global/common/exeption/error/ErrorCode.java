@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 	// General Server Error
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
-	INVALID_INPUT_VALUE(HttpStatus.INTERNAL_SERVER_ERROR, "유효하지 않은 입력 값입니다."),
+	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력 값입니다."),
 
 	// Database Errors
 	DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 오류가 발생했습니다."),

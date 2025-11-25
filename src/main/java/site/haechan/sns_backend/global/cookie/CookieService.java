@@ -24,6 +24,7 @@ public class CookieService {
 			.path("/")                  // 전체 경로에서 쿠키 접근 가능
 			.maxAge(maxAge)             // Duration을 초로 자동 변환
 			.domain(config.getDomain()) // 도메인 설정 추가
+			.sameSite("Lax")            // SameSite 속성 설정
 			.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

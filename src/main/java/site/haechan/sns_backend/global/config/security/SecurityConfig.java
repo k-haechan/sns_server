@@ -1,9 +1,8 @@
 package site.haechan.sns_backend.global.config.security;
 
-import static org.apache.tomcat.util.http.Method.*;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,16 +13,15 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
-import site.haechan.sns_backend.domain.auth.service.AuthService;
 import site.haechan.sns_backend.global.config.security.exception.CustomAccessDeniedHandler;
 import site.haechan.sns_backend.global.config.security.exception.CustomAuthenticationEntryPoint;
 import site.haechan.sns_backend.global.config.security.filter.JwtAuthenticationFilter;
-import site.haechan.sns_backend.global.cookie.CookieService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -31,7 +29,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthService authService, CookieService cookieService) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(
@@ -46,15 +44,15 @@ public class SecurityConfig {
 					.requestMatchers("/error").permitAll()
 
 					// MEMBER Domain
-					.requestMatchers(POST, "/api/v1/members/join").permitAll()
-					.requestMatchers(POST, "/api/v1/auth/**").permitAll()
+					.requestMatchers(HttpMethod.POST, "/api/v1/members/join").permitAll()
+					.requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 					.anyRequest().authenticated()
 			)
 
 
 			// ✅ JWT 필터 등록
 			.addFilterBefore(
-				new JwtAuthenticationFilter(authService, cookieService),
+				jwtAuthenticationFilter,
 				UsernamePasswordAuthenticationFilter.class)
 
 			// ✅ 기본 인증 방식 비활성화 (JWT 사용)

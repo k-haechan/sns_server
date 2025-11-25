@@ -53,13 +53,14 @@ public class AuthController {
 	public ApiResponse<Void> logout(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = cookieService.extractCookie(request, JwtType.REFRESH.getTokenName());
 
-		authService.revokeRefreshToken(refreshToken);
-
+		if (refreshToken != null) {
+			authService.revokeRefreshToken(refreshToken);
+		}
 		cookieService.deleteCookie(response, JwtType.ACCESS.getTokenName());
 		cookieService.deleteCookie(response, JwtType.REFRESH.getTokenName());
 
 		SecurityContextHolder.clearContext();
-		
+
 		return ApiResponse.success("로그아웃이 성공적으로 완료되었습니다.");
 	}
 }
